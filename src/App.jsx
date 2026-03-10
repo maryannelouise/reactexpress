@@ -1,83 +1,99 @@
-import { useEffect, useState } from "react";
+import { useState } from "react"
 
-function App() {
-  const [info1, setInfo1] = useState({});
-  const [info2, setInfo2] = useState({});
-  const [info3, setInfo3] = useState({});
-  const [info4, setInfo4] = useState({});
-  const [info5, setInfo5] = useState({});
+export default function HomePage() {
 
-  useEffect(() => {
-    fetch("http://localhost:5000/getinfo")
-      .then(res => res.json())
-      .then(data => setInfo1(data));
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [data, setData] = useState(null)
 
-    fetch("http://localhost:5000/getinfo2")
-      .then(res => res.json())
-      .then(data => setInfo2(data));
+  const submitHandler = async (e) => {
+    e.preventDefault()
 
-    fetch("http://localhost:5000/getinfo3")
-      .then(res => res.json())
-      .then(data => setInfo3(data));
+    const result = await fetch('http://localhost:5000/form', {
+      method: 'POST',
+      headers: {
+        "Content-Type": 'application/json'
+      },
+      body: JSON.stringify({
+        username,
+        password
+      })
+    })
 
-    fetch("http://localhost:5000/getinfo4")
-      .then(res => res.json())
-      .then(data => setInfo4(data));
+    const response = await result.json()
 
-    fetch("http://localhost:5000/getinfo5")
-      .then(res => res.json())
-      .then(data => setInfo5(data));
-  }, []);
+    console.log(response.username, response.password)
+
+    setData(response)
+  }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-pink-200 via-rose-100 to-purple-200 flex items-center justify-center p-6">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-pink-200 via-rose-200 to-fuchsia-200">
 
-      <div className="absolute w-72 h-72 bg-pink-300 rounded-full blur-3xl opacity-40 top-10 left-10 animate-pulse"></div>
-      <div className="absolute w-96 h-96 bg-purple-300 rounded-full blur-3xl opacity-40 bottom-10 right-10 animate-pulse"></div>
+      <form
+        onSubmit={submitHandler}
+        className="backdrop-blur-md bg-white/70 border border-white/40 shadow-2xl rounded-3xl p-10 w-full max-w-md flex flex-col gap-6"
+      >
+        <h1 className="text-3xl font-bold text-center text-pink-600">
+          Welcome
+        </h1>
 
-      <div className="relative w-full max-w-5xl">
+        <p className="text-center text-gray-500 text-sm">
+          Login to continue
+        </p>
 
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-extrabold text-pink-600 drop-shadow-md">
-            ✨ Hello, I'm {info1.FirstName} ✨
-          </h1>
-          
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-pink-700">
+            Username
+          </label>
+          <input
+            onChange={(e) => setUsername(e.target.value)}
+            className="border border-pink-200 rounded-xl p-3"
+            type="text"
+            placeholder="Enter your username"
+          />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-pink-700">
+            Password
+          </label>
+          <input
+            onChange={(e) => setPassword(e.target.value)}
+            className="border border-pink-200 rounded-xl p-3"
+            type="password"
+            placeholder="Enter your password"
+          />
+        </div>
 
-          <div className="bg-white/70 backdrop-blur-lg rounded-[40px] shadow-2xl p-8 border-4 border-pink-200 hover:rotate-1 transition duration-500">
-            <h2 className="text-2xl font-bold text-pink-500 mb-6">💖 About Me</h2>
-            <div className="space-y-3 text-gray-700 text-lg">
-              <p><span className="font-semibold text-pink-600">Age:</span> {info2.Age}</p>
-              <p><span className="font-semibold text-pink-600">Course:</span> {info1.Course}</p>
-              <p><span className="font-semibold text-pink-600">Year Level:</span> {info2.YearLevel}</p>
-              <p><span className="font-semibold text-pink-600">School:</span> {info2.School}</p>
-              <p><span className="font-semibold text-pink-600">Motto:</span> {info1.Motto}</p>
-            </div>
-          </div>
+        <button
+          className="bg-gradient-to-r from-pink-500 to-rose-500 text-white py-3 rounded-xl"
+          type="submit"
+        >
+          Submit
+        </button>
+      </form>
 
-          <div className="bg-white/70 backdrop-blur-lg rounded-[40px] shadow-2xl p-8 border-4 border-purple-200 hover:-rotate-1 transition duration-500">
-            <h2 className="text-2xl font-bold text-purple-500 mb-6">🌸 My Hobbies</h2>
-            <p className="text-gray-700 text-lg">{info3.Hobbies}</p>
-          </div>
+      {data && (
+        <div className="absolute bottom-10 backdrop-blur-md bg-white/70 border border-white/40 shadow-xl rounded-2xl p-6 w-80 text-center">
 
-          <div className="bg-white/70 backdrop-blur-lg rounded-[40px] shadow-2xl p-8 border-4 border-rose-200 hover:rotate-1 transition duration-500">
-            <h2 className="text-2xl font-bold text-rose-500 mb-6">🎂 Birthday</h2>
-            <p className="text-gray-700 text-lg">{info4.Birthday}</p>
-          </div>
+          <h3 className="text-xl font-bold text-pink-600 mb-4">
+            Returned Data
+          </h3>
 
-          <div className="bg-white/70 backdrop-blur-lg rounded-[40px] shadow-2xl p-8 border-4 border-pink-300 hover:-rotate-1 transition duration-500">
-            <h2 className="text-2xl font-bold text-pink-600 mb-6">🍓 Favorite Food</h2>
-            <p className="text-gray-700 text-lg leading-relaxed">{info5.Favorite_Food}</p>
+          <div className="flex flex-col gap-2 text-gray-700">
+            <p className="bg-pink-100 rounded-lg p-2">
+              <span className="font-semibold text-pink-600">Username:</span> {data.username}
+            </p>
+
+            <p className="bg-rose-100 rounded-lg p-2">
+              <span className="font-semibold text-rose-600">Password:</span> {data.password}
+            </p>
           </div>
 
         </div>
+      )}
 
-
-      </div>
     </div>
-  );
+  )
 }
-
-export default App;
