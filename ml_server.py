@@ -27,8 +27,16 @@ app.add_middleware(
 # -----------------------------
 # Load ML Model
 # -----------------------------
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_PATH = BASE_DIR / "model" / "model.keras"
+
+print("Loading model from:", MODEL_PATH)
+
 try:
-    model = load_model("model/model.keras")  # make sure this path is correct
+    model = load_model(MODEL_PATH)
+    print("Model loaded successfully")
 except Exception as e:
     print("Error loading model:", e)
     model = None
@@ -60,7 +68,7 @@ async def classify_image(file: UploadFile = File(...)):
             shutil.copyfileobj(file.file, buffer)
 
         # Load and preprocess image
-        img = image.load_img(file_path, target_size=(150, 150))  # adjust if needed
+        img = image.load_img(str(file_path), target_size=(150, 150)) # adjust if needed
         img_array = image.img_to_array(img)
         img_array = np.expand_dims(img_array, axis=0) / 255.0
 
@@ -73,4 +81,5 @@ async def classify_image(file: UploadFile = File(...)):
         return {"label": predicted_label, "accuracy": round(accuracy, 2)}
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
+        print("Prediction error:", e)
+        raise HTTPException(status_code=500, detail=str(e))
