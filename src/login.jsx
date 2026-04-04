@@ -6,6 +6,9 @@ export default function Login({ onSwitch }) {
     password: "",
   });
 
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -13,15 +16,49 @@ export default function Login({ onSwitch }) {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login Data:", form);
+
+    // ✅ Validation
+    if (form.email.trim() === "" || form.password.trim() === "") {
+      setError("Please enter email and password");
+      return;
+    }
+
+    setError("");
+
+    try {
+      // ✅ FIXED URL (you had &#39;)
+      const res = await fetch("http://localhost:3001/authenticate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          // ⚠️ depends on backend (email or username)
+          username: form.email, 
+          password: form.password,
+        }),
+      });
+
+      const result = await res.json();
+      console.log(result);
+
+      if (res.ok) {
+        setMessage("Login successful ✅");
+      } else {
+        setError(result.message || "Invalid credentials ❌");
+      }
+
+    } catch (err) {
+      console.error(err);
+      setError("Server error ❌");
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-200 via-pink-300 to-rose-400">
       
-      {/* Glass Card */}
       <div className="backdrop-blur-xl bg-white/30 border border-white/40 p-8 rounded-3xl shadow-2xl w-[380px]">
         
         <h2 className="text-3xl font-extrabold text-center text-pink-700 mb-6">
@@ -68,12 +105,19 @@ export default function Login({ onSwitch }) {
             </label>
           </div>
 
+          {/* Messages */}
+          {error && (
+            <p className="text-red-500 text-sm text-center">{error}</p>
+          )}
+          {message && (
+            <p className="text-green-600 text-sm text-center">{message}</p>
+          )}
 
           {/* Button */}
           <button className="w-full py-2.5 rounded-full font-semibold text-white 
             bg-gradient-to-r from-pink-500 to-rose-500 
             hover:from-pink-600 hover:to-rose-600 
-            shadow-lg hover:shadow-pink-300 transition duration-300">
+            shadow-lg transition duration-300">
             Login
           </button>
         </form>

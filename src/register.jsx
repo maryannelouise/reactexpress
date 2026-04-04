@@ -10,6 +10,7 @@ export default function Register({ onSwitch }) {
     });
 
     const [error, setError] = useState("");
+    const [message, setMessage] = useState("");
 
     const handleChange = (e) => {
         setForm({
@@ -18,8 +19,18 @@ export default function Register({ onSwitch }) {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // ✅ Validation
+        if (
+            form.name.trim() === "" ||
+            form.email.trim() === "" ||
+            form.password.trim() === ""
+        ) {
+            setError("Please fill in all required fields");
+            return;
+        }
 
         if (form.password !== form.confirmPassword) {
             setError("Passwords do not match 💔");
@@ -27,13 +38,35 @@ export default function Register({ onSwitch }) {
         }
 
         setError("");
-        console.log("Register Data:", form);
+
+        try {
+            // ✅ FIXED fetch URL (you had a syntax error)
+            const response = await fetch("http://localhost:3001/adduser", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    username: form.name,
+                    email: form.email,
+                    password: form.password,
+                    birthdate: form.birthdate,
+                }),
+            });
+
+            const result = await response.json();
+            console.log(result);
+
+            setMessage("Account created successfully ✅");
+        } catch (err) {
+            console.error(err);
+            setError("Something went wrong ❌");
+        }
     };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-200 via-pink-300 to-rose-400">
             
-            {/* Glass Card */}
             <div className="backdrop-blur-xl bg-white/30 border border-white/40 p-8 rounded-3xl shadow-2xl w-[380px]">
                 
                 <h2 className="text-3xl font-extrabold text-center text-pink-700 mb-6">
@@ -42,7 +75,7 @@ export default function Register({ onSwitch }) {
 
                 <form onSubmit={handleSubmit} className="space-y-5">
 
-                    {/* Floating Input */}
+                    {/* Name + Email */}
                     {[
                         { name: "name", type: "text", label: "Full Name" },
                         { name: "email", type: "email", label: "Email" },
@@ -76,8 +109,7 @@ export default function Register({ onSwitch }) {
                             required
                             className="peer w-full px-4 pt-5 pb-2 rounded-full bg-white/70 border border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-300 outline-none"
                         />
-                        <label className="absolute left-4 top-2 text-pink-500 text-sm 
-                            peer-focus:text-pink-600">
+                        <label className="absolute left-4 top-2 text-pink-500 text-sm">
                             Birthdate
                         </label>
                     </div>
@@ -106,18 +138,19 @@ export default function Register({ onSwitch }) {
                         </div>
                     ))}
 
-                    {/* Error */}
+                    {/* Error / Success */}
                     {error && (
-                        <p className="text-red-500 text-sm text-center animate-pulse">
-                            {error}
-                        </p>
+                        <p className="text-red-500 text-sm text-center">{error}</p>
+                    )}
+                    {message && (
+                        <p className="text-green-600 text-sm text-center">{message}</p>
                     )}
 
-                    {/* Button */}
+                    {/* Submit */}
                     <button className="w-full py-2.5 rounded-full font-semibold text-white 
                         bg-gradient-to-r from-pink-500 to-rose-500 
                         hover:from-pink-600 hover:to-rose-600 
-                        shadow-lg hover:shadow-pink-300 transition duration-300">
+                        shadow-lg transition duration-300">
                         Create Account
                     </button>
                 </form>
